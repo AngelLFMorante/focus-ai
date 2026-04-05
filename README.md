@@ -1,36 +1,117 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# FocusAI - Tu Cerebro de Aprendizaje Inteligente
 
-## Getting Started
+> Resumidor inteligente de temario con IA local y almacenamiento en la nube.
 
-First, run the development server:
+## Arquitectura
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+FocusAI utiliza un sistema híbrido que combina:
+
+- **Vercel (Next.js)**: Frontend renderizado en el edge para máxima velocidad
+- **Supabase**: Base de datos PostgreSQL + Autenticación + Storage
+- **Ollama (Windows)**: Modelo de IA local (Llama3/Qwen) para procesamiento offline
+
+```
+┌─────────────────────────────────────────────────────────┐
+│                    FocusAI App                           │
+├──────────────┬─────────────────┬─────────────────────────┤
+│   Next.js    │   Supabase      │   Ollama (Local)        │
+│   (Frontend) │   (Backend)     │   (IA Local)            │
+│              │                 │                         │
+│  - UI/UX     │  - Datos        │  - Llama3.2             │
+│  - Paginación│  - CRUD         │  - Qwen2.5               │
+│  - Buscador  │  - Autenticación│  - Procesamiento offline │
+└──────────────┴─────────────────┴─────────────────────────┘
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Screenshot
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+> 
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Escalabilidad
 
-## Learn More
+FocusAI está diseñado para crecer con tus necesidades:
 
-To learn more about Next.js, take a look at the following resources:
+### Exportación a Notion/PDF
+- Exporta tus lecciones directamente a Notion
+- Genera PDFs con formato profesional para imprimir
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### Sistema de Tags por Colores
+- Organiza tus notas con etiquetas visuales
+- Colores por categoría: 🟢 Conceptos, 🔵 Ejemplos, 🔴 Importante
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### Selector de Modelos de IA
+- Cambia entre modelos en tiempo real:
+  - **Llama3.2**: Excelente para español
+  - **Qwen2.5**: Multilingüe avanzado
+  - **Mistral**: Rápido y eficiente
 
-## Deploy on Vercel
+## Instalación
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### Requisitos Previos
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+1. **Node.js 18+** y npm/pnpm
+2. **Ollama** instalado en Windows:
+   ```bash
+   winget install Ollama.Ollama
+   ollama pull llama3.2
+   ```
+
+### Configuración
+
+1. Clona el repositorio:
+   ```bash
+   git clone <tu-repo>
+   cd focus-ai
+   ```
+
+2. Instala dependencias:
+   ```bash
+   npm install
+   ```
+
+3. Crea `.env.local`:
+   ```env
+   NEXT_PUBLIC_SUPABASE_URL=tu_url_supabase
+   NEXT_PUBLIC_SUPABASE_ANON_KEY=tu_anon_key
+   OLLAMA_BASE_URL=http://localhost:11434
+   ```
+
+4. Ejecuta:
+   ```bash
+   npm run dev
+   ```
+
+## Estructura del Proyecto
+
+```
+focus-ai/
+├── app/
+│   ├── api/summarize/route.ts    # API para Ollama
+│   ├── layout.tsx                # Layout principal
+│   └── page.tsx                  # Home con paginación
+├── components/ui/
+│   ├── button.tsx
+│   ├── card.tsx
+│   ├── textarea.tsx
+│   └── pagination.tsx            # Componente de paginación
+├── hooks/
+│   └── useLecciones.ts           # Hook con paginación
+├── lib/
+│   ├── supabase.ts               # Cliente Supabase
+│   └── utils.ts
+├── service/
+│   └── lecciones.ts              # CRUD de lecciones
+└── README.md
+```
+
+## Variables de Entorno
+
+| Variable | Descripción |
+|----------|-------------|
+| `NEXT_PUBLIC_SUPABASE_URL` | URL de tu proyecto Supabase |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Key pública de Supabase |
+| `OLLAMA_BASE_URL` | URL de Ollama (default: localhost:11434) |
+
+## Licencia
+
+MIT License - © FocusAI
