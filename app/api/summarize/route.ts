@@ -23,11 +23,13 @@ export async function POST(request: NextRequest) {
         });
 
         if (!response.ok) {
-            const errorData = await response.text();
-            return NextResponse.json(
-                { error: "Ollama Error", details: errorData },
-                { status: response.status }
-            );
+            let details;
+            try {
+                details = await response.json(); // intenta parsear JSON
+            } catch {
+                details = await response.text(); // si no, texto plano
+            }
+            return NextResponse.json({ error: "Ollama Error", details }, { status: response.status });
         }
 
         const data = await response.json();

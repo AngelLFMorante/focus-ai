@@ -37,27 +37,35 @@ export default function Home() {
     try {
       const response = await fetch("/api/summarize", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          prompt: `Resume en 2 frases: ${texto}`,
-        }),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ prompt: `Resume en 2 frases: ${texto}` }),
       });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        console.error("Error en API summarize:", errorData);
+      let data;
+      try {
+        data = await response.json();
+      } catch {
+        // Si la respuesta no es JSON
+        const text = await response.text();
+        console.error("Respuesta no JSON:", text);
+        alert("Ocurrió un error inesperado en la IA. Revisa la consola.");
         return;
       }
 
-      const data = await response.json();
-      console.log("Respuesta IA:", data);
+      if (data.error) {
+        console.error("Error de API summarize:", data.error, data.details || "");
+        alert("Error al generar resumen. Revisa la consola.");
+        return;
+      }
+
+      console.log("Resumen IA:", data.response);
       await leccionesService.insert({ contenido: texto, resumen: data.response });
       await cargarLecciones();
       setTexto("");
+
     } catch (err) {
       console.error("Error al generar resumen:", err);
+      alert("Error inesperado al generar resumen. Revisa la consola.");
     } finally {
       setIsAnalyzing(false);
     }
@@ -77,25 +85,16 @@ export default function Home() {
     const maxItems = 5;
 
     if (totalPaginas <= maxItems) {
-      for (let i = 1; i <= totalPaginas; i++) {
-        items.push(i);
-      }
+      for (let i = 1; i <= totalPaginas; i++) items.push(i);
     } else {
       if (paginaActual > 3) {
-        items.push(1);
-        items.push("...");
+        items.push(1, "...");
       }
-
       const inicio = Math.max(2, paginaActual - 1);
       const fin = Math.min(totalPaginas, paginaActual + 1);
-
-      for (let i = inicio; i <= fin; i++) {
-        items.push(i);
-      }
-
+      for (let i = inicio; i <= fin; i++) items.push(i);
       if (paginaActual < totalPaginas - 2) {
-        items.push("...");
-        items.push(totalPaginas);
+        items.push("...", totalPaginas);
       }
     }
 
@@ -112,7 +111,7 @@ export default function Home() {
       </header>
 
       <main className="max-w-7xl mx-auto px-4 space-y-10">
-        {/* Formulario Limpio */}
+        {/* Formulario de Resumen */}
         <section>
           <Card className="border-slate-200 shadow-sm overflow-hidden">
             <CardContent className="p-0">
@@ -135,7 +134,7 @@ export default function Home() {
           </Card>
         </section>
 
-        {/* Buscador y Lista */}
+        {/* Buscador y Lista de Lecciones */}
         <section className="space-y-6">
           <div className="flex items-center gap-4">
             <input
@@ -195,8 +194,8 @@ export default function Home() {
                       isActive={item === paginaActual}
                       onClick={() => typeof item === "number" && irAPagina(item)}
                       className={`h-8 w-8 px-0 ${item === paginaActual
-                          ? "bg-[#06b6d4] text-white hover:bg-[#0891b2]"
-                          : "text-slate-600 hover:bg-slate-100"
+                        ? "bg-[#06b6d4] text-white hover:bg-[#0891b2]"
+                        : "text-slate-600 hover:bg-slate-100"
                         }`}
                     >
                       {item}
