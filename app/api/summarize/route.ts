@@ -7,27 +7,31 @@ export async function POST(request: NextRequest) {
         const { prompt } = await request.json();
 
         const ollamaUrl = process.env.OLLAMA_URL;
+        const model = process.env.OLLAMA_MODEL;
 
-        if (!ollamaUrl) {
-            throw new Error("Variable OLLAMA_URL no configurada en el entorno");
-        }
+        if (!ollamaUrl) throw new Error("OLLAMA_URL no configurada");
+        if (!model) throw new Error("OLLAMA_MODEL no configurado");
 
         const response = await fetch(ollamaUrl, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
-                model: process.env.OLLAMA_MODEL,
-                prompt: prompt,
+                model,
+                prompt,
                 stream: false,
             }),
         });
 
         if (!response.ok) {
             const errorData = await response.text();
-            return NextResponse.json({ error: "Ollama Error", details: errorData }, { status: response.status });
+            return NextResponse.json(
+                { error: "Ollama Error", details: errorData },
+                { status: response.status }
+            );
         }
 
         const data = await response.json();
+
         return NextResponse.json({ response: data.response });
 
     } catch (error: any) {
