@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
+import { leccionesService, supabase } from "./lecciones";
 
-// MOCK COMPLETO Y CONSISTENTE
+// MOCK COMPLETO DE SUPABASE
 vi.mock("@supabase/supabase-js", () => {
     const mock = {
         from: vi.fn().mockReturnThis(),
@@ -9,15 +10,13 @@ vi.mock("@supabase/supabase-js", () => {
         insert: vi.fn().mockReturnThis(),
         delete: vi.fn().mockReturnThis(),
         eq: vi.fn().mockReturnThis(),
-        single: vi.fn(),
+        single: vi.fn().mockReturnThis(),
     };
 
     return {
         createClient: () => mock,
     };
 });
-
-import { leccionesService, supabase } from "./lecciones";
 
 describe("leccionesService - CRUD Operations", () => {
     const s = supabase as any;
@@ -29,9 +28,8 @@ describe("leccionesService - CRUD Operations", () => {
     it("debe obtener todas las lecciones ordenadas", async () => {
         const mockData = [{ id: "1", contenido: "Test", resumen: "R", created_at: "now" }];
 
-        s.order.mockImplementationOnce(() => ({
-            then: (resolve: any) => resolve({ data: mockData, error: null }),
-        }));
+        // Mock de getAll
+        s.order.mockResolvedValue({ data: mockData, error: null });
 
         const result = await leccionesService.getAll();
 
@@ -42,12 +40,10 @@ describe("leccionesService - CRUD Operations", () => {
 
     it("debe insertar lección", async () => {
         const newLeccion = { contenido: "C", resumen: "R" };
+        const insertedLeccion = { id: "1", ...newLeccion, created_at: "now" };
 
-        // Mock cadena completa: insert → select → single
-        s.single.mockResolvedValue({
-            data: { id: "1", ...newLeccion, created_at: "now" },
-            error: null,
-        });
+        // Mock cadena insert → select → single
+        s.single.mockResolvedValue({ data: insertedLeccion, error: null });
 
         const result = await leccionesService.insert(newLeccion);
 
@@ -55,15 +51,12 @@ describe("leccionesService - CRUD Operations", () => {
             contenido: "C",
             resumen: "R",
         });
-
-        expect(result).toBeTruthy();
-        expect(result.contenido).toBe("C");
+        expect(result).toEqual(insertedLeccion);
     });
 
     it("debe eliminar lección por ID", async () => {
-        s.eq.mockImplementationOnce(() => ({
-            then: (resolve: any) => resolve({ error: null }),
-        }));
+        // Mock delete → eq
+        s.eq.mockResolvedValue({ data: null, error: null });
 
         await leccionesService.delete("123");
 
