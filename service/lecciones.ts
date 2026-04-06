@@ -13,79 +13,43 @@ export interface Leccion {
 }
 
 export const leccionesService = {
-    // Obtener todas las lecciones ordenadas por fecha (más recientes primero)
+    // Obtener todas las lecciones ordenadas por fecha
     getAll: async (): Promise<Leccion[]> => {
         const { data, error } = await supabase
             .from("lecciones")
             .select("*")
             .order("created_at", { ascending: false });
 
-        if (error) {
-            console.error("Error al obtener lecciones:", error);
-            throw error;
-        }
+        if (error) throw error;
 
         return data || [];
     },
 
-    // Insertar nueva lección
-    insert: async (leccion: Omit<Leccion, "id" | "created_at">): Promise<void> => {
-        const { error } = await supabase
+    // Insertar nueva lección (DEVOLVIENDO DATA)
+    insert: async (
+        leccion: Omit<Leccion, "id" | "created_at">
+    ): Promise<Leccion> => {
+        const { data, error } = await supabase
             .from("lecciones")
             .insert({
                 contenido: leccion.contenido,
                 resumen: leccion.resumen,
-            });
-
-        if (error) {
-            console.error("Error al insertar lección:", error);
-            throw error;
-        }
-    },
-
-    // Obtener lección por ID
-    getById: async (id: string): Promise<Leccion | null> => {
-        const { data, error } = await supabase
-            .from("lecciones")
-            .select("*")
-            .eq("id", id)
+            })
+            .select()
             .single();
 
-        if (error) {
-            console.error("Error al obtener lección por ID:", error);
-            throw error;
-        }
+        if (error) throw error;
 
-        return data || null;
+        return data;
     },
 
-    // Eliminar lección por ID
+    // Eliminar lección
     delete: async (id: string): Promise<void> => {
         const { error } = await supabase
             .from("lecciones")
             .delete()
             .eq("id", id);
 
-        if (error) {
-            console.error("Error al eliminar lección:", error);
-            throw error;
-        }
-    },
-
-    // Buscar lecciones por término
-    search: async (term: string): Promise<Leccion[]> => {
-        const { data, error } = await supabase
-            .from("lecciones")
-            .select("*")
-            .ilike("resumen", `%${term}%`)
-            .or(`ilike(contenido, %${term}%)`)
-            .order("created_at", { ascending: false });
-
-        if (error) {
-            console.error("Error al buscar lecciones:", error);
-            throw error;
-        }
-
-        return data || [];
+        if (error) throw error;
     },
 };
