@@ -2,6 +2,9 @@
 
 > Resumidor inteligente de temario con IA local y almacenamiento en la nube.
 
+[!IMPORTANT]
+Esta aplicación utiliza un modelo de IA híbrido. Asegúrate de tener **Ollama** ejecutándose en tu red local para que el procesamiento de resúmenes funcione correctamente.
+
 ## Arquitectura
 
 FocusAI utiliza un sistema híbrido que combina:
@@ -25,6 +28,10 @@ FocusAI utiliza un sistema híbrido que combina:
 
 ## Screenshot
 
+![FocusAI Dashboard](./public/screenshots/dashboard.png)
+
+[!TIP]
+Para obtener mejores resultados en los resúmenes, intenta pegar textos estructurados por párrafos. El modelo Qwen 2.5 es especialmente bueno manteniendo el formato de listas.
 > 
 
 ## Escalabilidad
@@ -55,6 +62,8 @@ FocusAI está diseñado para crecer con tus necesidades:
    winget install Ollama.Ollama
    ollama pull llama3.2
    ```
+[!WARNING]
+Si accedes desde una red distinta, la IP de tu servidor Ollama puede cambiar. Verifica siempre tu OLLAMA_URL en el entorno.
 
 ### Configuración
 
@@ -111,6 +120,9 @@ focus-ai/
 | `NEXT_PUBLIC_SUPABASE_URL` | URL de tu proyecto Supabase |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Key pública de Supabase |
 | `OLLAMA_BASE_URL` | URL de Ollama (default: localhost:11434) |
+
+[!NOTE]
+En producción (Vercel), asegúrate de configurar el Timeout de la Función a 60s, ya que los modelos de IA locales pueden tardar en procesar textos largos.
 
 ## Licencia
 
